@@ -84,6 +84,8 @@ Every configuration key is optional and by default Synapse will scan through all
 
 Lastly, you need to configure your HTTP handler. Within a Laravel application this is typically done in `resources/js/app.js` but any entrypoint will do.
 
+here is an example of configuring Synapse with Inertia/React,
+
 ```js
 import { router } from '@inertiajs/react';
 import { setRequestHandler } from 'synapse/php';
@@ -109,19 +111,21 @@ When the client calls a `php` tagged template string: instead of parsing the str
 The real magic is in how Javascript handles tagged template strings. Here's a very. brief example,
 
 ```js
-const name = 'Michael';
-php`echo ${name};`
+const firstName = 'Michael';
+const lastName = 'Bluth';
+php`echo "${lastName}, ${firstName}";`
 ```
 
-In that example the synapse/php template gets called with string parameters matching `"echo "` and `";"`. It also gets called with value parameters matching the value of `name`.
+In that example the synapse/php template gets called with string parameters matching `"echo \""`, `", "` and `"\";"`. It also gets called with value parameters matching the values of `lastName` and `firstName`.
 
 On the client-side we ignore the strings entirely (in fact Vite replaces them out with empty strings so your PHP is not leaked). Then, we can pull out the values and send just the values across the HTTP boundary to the server.
 
 That leaves us with the above source JS that compiles to the following compiled JS (where `ahufduah` is a pseudo random hash generated during the compilation step).
 
 ```js
-const name = 'Michael';
-php`ahufduah${name}`
+const firstName = 'Michael';
+const lastName = 'Bluth';
+php`ahufduah${lastName}${firstName}`
 ```
 
 The compiled PHP looks like this, after swapping out the JS variables for PHP variables:
@@ -129,14 +133,14 @@ The compiled PHP looks like this, after swapping out the JS variables for PHP va
 ```php
 <?php
 
-echo $variable0;
+echo "$variable0, $variable1";
 ```
 
 Lastly, we can make a HTTP request with the following payload,
 
 ```http
 POST /synapse
-{"_payloads":[{"hash":"ahufduah","params":["Michael"]}]}
+{"_payloads":[{"hash":"ahufduah","params":["Bluth","Michael"]}]}
 ```
 
 That HTTP request uses the payload to route to the PHP file and execute it with the passed params.
