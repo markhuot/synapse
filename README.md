@@ -1,6 +1,11 @@
 Synapse
 ====
 
+```bash
+$ composer install markhuot/synapse
+$ npm install --save @markhuot/synapse
+```
+
 Write PHP code directly in Javascript and seamlessly transition data across the http boundry from client to server and back again.
 
 ```ts
