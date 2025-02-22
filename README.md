@@ -164,7 +164,7 @@ Calling execute returns a promise which is resolved with any data retuened from 
 
 ```js
 const name = 'Michael';
-const upperName = php`return strtoupper(${name});`
+const upperName = await php`return strtoupper(${name});`
   .execute()
   .then(res => res.text());
 ```
