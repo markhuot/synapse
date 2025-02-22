@@ -12,7 +12,7 @@ const toggleTodo = async (todoId) => `php
 
     $todo->complete = !$todo->complete;
     $todo->save();
-`
+`.execute()
 
 const deleteTodo = async (todoId) => {
     if (! confirm('Are you sure you want to delete this todo?')) {
