@@ -184,3 +184,30 @@ Execute can also be passed `FormData` or a `SubmitEvent` and the form will be se
 <form action={php`...`.execute}>
 <form onSubmit={php`...`.execute}>
 ```
+
+### Composing PHP
+
+
+You may find yourself repeating yourself a lot in various PHP strings because each handler is executed fresh. To keep code dry you can "compose" multiple strings together in to a single request.
+
+```js
+import {php,compose} from "@markhuot/synapse/php";
+
+const preamble = todoId => php`
+  use \App\Models\Todo;
+  $todo = Todo::find(${todoId});
+  Gate('update', $todo);
+`;
+
+const postscript = php`
+  Log::info("Todo $todo->id updated");
+`;
+
+const toggleTodoCompleted = todoId => compose(
+  preamble(todoId),
+  php`$todo->toggleComplete();`,
+  postscript,
+).execute();
+```
+
+On the server these are all still saved out as separate files. but they are executed in order within the same scope so variables can be shared between files.
