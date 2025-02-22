@@ -144,3 +144,34 @@ POST /synapse
 ```
 
 That HTTP request uses the payload to route to the PHP file and execute it with the passed params.
+
+Writing PHP
+---
+
+Writing PHP happens in a `php` tagged template string. It should look like this:
+
+```js
+php`return "Hi from the server.`
+```
+
+Tagged template strings don't execute immediately, we'll see why in a moment. To make an Ajax request and execute the PHP you have to call `execute()` on the string. For example,
+
+```js
+php`return "Hi from the server.`.execute()
+```
+
+The execute call accepts a variety of data to configure the resulting Ajax request. You can send a plain object with keys that align with a `fetch()` init object.
+
+```js
+php`...`.execute({
+  headers: { 'content-type': 'text/plain' },
+  body: { additional: 'params' },
+  method: 'put',
+})
+```
+Execute can also be passed `FormData` or a `SubmitEvent` and the form will be serialized and submitted. That means both of these are valid too. Note the lack of `()` when using the tagged template string as a handler,
+
+```js
+<form action={php`...`.execute}>
+<form onSubmit={php`...`.execute}>
+```
