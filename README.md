@@ -44,7 +44,7 @@ Getting started
 You need to configure boths sides of the client/server boundary to utilize Synapse. First, lets configure the server side.
 
 > [!NOTE]
-> If you're using Laravel the server side is automatically configured when you run `composer require markhuot/synapse`. You can skip to the client-side setup.
+> If you're using Laravel the server-side is automatically configured when you run `composer require markhuot/synapse`. You can skip to the client-side setup.
 
 ### Server-side
 
@@ -52,7 +52,7 @@ Synapse expects an HTTP handler listening at `/synapse`, by default. You can con
 
 ```php
 $action = new Synapse\Actions\HandleSynapseRequest(
-    path: '.synapse/handlers/'
+    path: PROJECT_ROOT.'/.synapse/handlers/'
 );
 
 $result = $action($_POST['_payloads']);
@@ -97,6 +97,46 @@ If you do not set a request handler a default handler will make a request to `/s
 
 ## How it works
 
-When Vite compiles your JS it removes any `php` tagged template strings and moves each string in to its own `.php` file.
+When Vite compiles your JS it removes any `php` tagged template strings and moves each template string in to its own `.php` file.
 
-Then, when the client calls a `php` tagged template string: instead of parsing the string, it makes a HTTP request to your back-end with a payload containing a random hash identifying the block(s) of PHP to run.
+As the PHP code is moved to its own file the JS file is updated with a pseudo random hash. The raw PHP is removed. This means your PHP code is never sent to the client and is not inspectable.
+
+> [!NOTE]
+> The hashes generated for each template string are pseudo random and are not reproducible. Because of that you should not share generated php files across computers. The .synapse directory should be .gitignored and re-generated in dev, staging, and production--just like you would your compiled JS.
+
+When the client calls a `php` tagged template string: instead of parsing the string, it makes a HTTP request to your back-end with a payload containing a random hash identifying the block(s) of PHP to run.
+
+The real magic is in how Javascript handles tagged template strings. Here's a very. brief example,
+
+```js
+const name = 'Michael';
+php`echo ${name};`
+```
+
+In that example the synapse/php template gets called with string parameters matching `"echo "` and `";"`. It also gets called with value parameters matching the value of `name`.
+
+On the client-side we ignore the strings entirely (in fact Vite replaces them out with empty strings so your PHP is not leaked). Then, we can pull out the values and send just the values across the HTTP boundary to the server.
+
+That leaves us with the above source JS that compiles to the following compiled JS (where `ahufduah` is a pseudo random hash generated during the compilation step).
+
+```js
+const name = 'Michael';
+php`ahufduah${name}`
+```
+
+The compiled PHP looks like this, after swapping out the JS variables for PHP variables:
+
+```php
+<?php
+
+echo $variable0;
+```
+
+Lastly, we can make a HTTP request with the following payload,
+
+```http
+POST /synapse
+{"_payloads":[{"hash":"ahufduah","params":["Michael"]}]}
+```
+
+That HTTP request uses the payload to route to the PHP file and execute it with the passed params.
