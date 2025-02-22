@@ -151,13 +151,22 @@ Writing PHP
 Writing PHP happens in a `php` tagged template string. It should look like this:
 
 ```js
-php`return "Hi from the server.`
+php`return "Hi from the server.";`
 ```
 
 Tagged template strings don't execute immediately, we'll see why in a moment. To make an Ajax request and execute the PHP you have to call `execute()` on the string. For example,
 
 ```js
-php`return "Hi from the server.`.execute()
+php`return "Hi from the server.";`.execute()
+```
+
+Calling execute returns a promise which is resolved with any data retuened from the server. That allows you to pass data both ways across the HTTP boundary,
+
+```js
+const name = 'Michael';
+const upperName = php`return strtoupper(${name});`
+  .execute()
+  .then(res => res.text());
 ```
 
 The execute call accepts a variety of data to configure the resulting Ajax request. You can send a plain object with keys that align with a `fetch()` init object.
