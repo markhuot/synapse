@@ -1,0 +1,24 @@
+{
+    "name": "markhuot/synapse",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "markhuot",
+            "email": "mark@markhuot.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Synapse\\": "php/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Synapse\\Laravel\\SynapseServiceProvider"
+            ]
+        }
+    }
+}

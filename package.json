@@ -1,0 +1,19 @@
+{
+  "name": "@markhuot/synapse",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "exports": {
+    "./php": "./js/php.ts",
+    "./vite": "./js/vite.ts"
+  },
+  "author": "",
+  "license": "MIT",
+  "description": "",
+  "devDependencies": {
+    "acorn-walk": "^8.3.4",
+    "astring": "^1.9.0",
+    "vite": "^6.1.1"
+  }
+}
