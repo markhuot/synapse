@@ -1,5 +1,6 @@
 {
     "name": "markhuot/synapse",
+    "description": "A neural-level connection between JavaScript and PHP",
     "type": "library",
     "license": "MIT",
     "authors": [
