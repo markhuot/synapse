@@ -165,7 +165,7 @@ Tagged template strings don't execute immediately, we'll see why in a moment. To
 php`return "Hi from the server.";`.execute()
 ```
 
-Calling execute returns a promise which is resolved with any data retuened from the server. That allows you to pass data both ways across the HTTP boundary,
+Calling execute returns a promise which is resolved with any data returned from the server. That allows you to pass data both ways across the HTTP boundary,
 
 ```js
 const name = 'Michael';
