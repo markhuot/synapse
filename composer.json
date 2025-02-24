@@ -1,5 +1,6 @@
 {
     "name": "markhuot/synapse",
+    "description": "A neural-level connection between JavaScript and PHP",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -8,7 +9,6 @@
             "email": "mark@markhuot.com"
         }
     ],
-    "require": {},
     "autoload": {
         "psr-4": {
             "Synapse\\": "php/"
@@ -19,6 +19,15 @@
             "providers": [
                 "Synapse\\Laravel\\SynapseServiceProvider"
             ]
+        }
+    },
+    "require-dev": {
+        "pestphp/pest": "^1.23",
+        "pestphp/pest-plugin-parallel": "^1.2"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
         }
     }
 }

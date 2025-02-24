@@ -17,6 +17,10 @@ class HandleSynapseRequest
     {
         $result = null;
 
+        if (empty($payloads)) {
+            throw new \RuntimeException('Missing payloads');
+        }
+
         foreach ($payloads as $payload) {
             $hash = $payload['hash'];
             $params = $payload['params'];
