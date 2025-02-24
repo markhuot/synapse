@@ -6,7 +6,7 @@ $ composer install markhuot/synapse
 $ npm install --save @markhuot/synapse
 ```
 
-Write PHP code directly in Javascript and seamlessly transition data across the http boundry from client to server and back again.
+Write PHP code directly in Javascript and seamlessly transition data across the http boundary from client to server and back again.
 
 ```ts
 import {php} from "@markhuot/synapse/php";
@@ -46,7 +46,7 @@ export default function Todo({ todo }) {
 Getting started
 ---
 
-You need to configure boths sides of the client/server boundary to utilize Synapse. First, lets configure the server side.
+You need to configure both sides of the client/server boundary to utilize Synapse. First, let's configure the server side.
 
 > [!NOTE]
 > If you're using Laravel the server-side is automatically configured when you run `composer require markhuot/synapse`. You can skip to the client-side setup.
@@ -85,7 +85,7 @@ export default defineConfig({
 });
 ```
 
-Every configuration key is optional and by default Synapse will scan through all files run through vite for `php` tagged templates.
+Every configuration key is optional and by default Synapse will scan through all files run through Vite for `php` tagged templates.
 
 Lastly, you need to configure your HTTP handler. Within a Laravel application this is typically done in `resources/js/app.js` but any entrypoint will do.
 
