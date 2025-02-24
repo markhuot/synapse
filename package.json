@@ -1,13 +1,13 @@
 {
   "name": "@markhuot/synapse",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "scripts": {
     "build": "tsc --skipLibCheck js/vite.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "exports": {
-    "./php": "./js/php.ts",
-    "./vite": "./js/vite.ts"
+    "./php": "./js/php",
+    "./vite": "./js/vite"
   },
   "author": "",
   "license": "MIT",
