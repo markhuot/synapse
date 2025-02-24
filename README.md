@@ -65,7 +65,7 @@ $result = $action($_POST['_payloads']);
 echo json_encode($result);
 ```
 
-The result of a Synapse handler is variable and dependant on the code you write within your Javascript files. In this example we blindly convert to JSON. In reality the result may be more nuanced and you'll need to account for things like redirects, headers, etc.
+The result of a Synapse handler is variable and dependent on the code you write within your Javascript files. In this example we blindly convert to JSON. In reality the result may be more nuanced and you'll need to account for things like redirects, headers, etc.
 
 ### Client-side
 
