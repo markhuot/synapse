@@ -3,6 +3,7 @@ name: JavaScript
 on:
   push:
     tags:
+      - '*'
 
 jobs:
   publish:
