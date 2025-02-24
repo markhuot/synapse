@@ -4,7 +4,7 @@ Synapse
 Write PHP code directly in Javascript and seamlessly transition data across the http boundry from client to server and back again.
 
 ```ts
-import {php} from "@markhuot/synapse";
+import {php} from "@markhuot/synapse/php";
 
 const toggleTodo = async (todoId) => `php
     $todo = \App\Models\Todo::findOrFail(${todoId});

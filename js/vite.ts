@@ -4,7 +4,11 @@ import * as path from 'path';
 import {simple} from 'acorn-walk';
 import {generate} from 'astring';
 
-export function synapse(options={}) {
+export function synapse(options:{
+    include?: Array<string|RegExp>,
+    exclude?: Array<string|RegExp>,
+    handlerPath?: string,
+} ={}) {
     const filter = createFilter(
         options.include || [],
         options.exclude || [/node_modules/],
@@ -37,7 +41,7 @@ export function synapse(options={}) {
                     // check if the php import is renamed
                     // console.log(node);
                 },
-                TaggedTemplateExpression(node) {
+                TaggedTemplateExpression(node: any) {
                     if (node.tag.name === 'php') {
                         const projectPath = path.relative(viteRoot, id);
                         const hash = generateFilesystemSafeHash(`${projectPath}-${tagIndex++}`);
