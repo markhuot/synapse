@@ -8,9 +8,9 @@ export function php(strings, ...params) {
         },
         execute(options={}) {
             const requestInit = normalizeRequestOptions(options);
-            requestInit.body._payloads = [{hash:strings[0], params}];
+            addPayloadToBody(requestInit.body, 0, strings[0], params);
 
-            getRequestHandler()(requestInit)
+            return getRequestHandler()(requestInit)
         }
     }
 }
@@ -21,20 +21,20 @@ export function compose(...codes) {
     return {
         execute(options={}) {
             const requestInit = normalizeRequestOptions(options);
-            requestInit.body._payloads = payloads;
+            payloads.forEach(({hash, params}, index) => addPayloadToBody(requestInit.body, index, hash, params));
 
-            getRequestHandler()(requestInit)
+            return getRequestHandler()(requestInit)
         }
     }
 }
 
 function normalizeRequestOptions(options={}) {
     if (options instanceof FormData) {
-        options = {body: Object.fromEntries(options.entries())};
+        options = {body: options};
     }
 
     if (options instanceof SubmitEvent) {
-        options = {body: Object.fromEntries(options.formData.entries())};
+        options = {body: options.formData};
     }
 
     options.url = options.url || '/synapse';
@@ -42,4 +42,17 @@ function normalizeRequestOptions(options={}) {
     options.body = options.body || {};
 
     return options;
+}
+
+function addPayloadToBody(body, payloadIndex, hash, params) {
+    if (body instanceof FormData) {
+        body.set(`_payloads[${payloadIndex}][hash]`, hash);
+        params.forEach((param, index) => {
+            body.set(`_payloads[${payloadIndex}][params][${index}]`, param);
+        });
+    }
+    else {
+        body._payloads = body._payloads || {};
+        body._payloads[payloadIndex] = {hash, params};
+    }
 }

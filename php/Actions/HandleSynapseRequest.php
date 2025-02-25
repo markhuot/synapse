@@ -23,7 +23,11 @@ class HandleSynapseRequest
 
         foreach ($payloads as $payload) {
             $hash = $payload['hash'];
-            $params = $payload['params'];
+
+            // params may not be set when it comes from
+            // a x-form-urlencoded request because there's
+            // no way to pass an empty array through FormData
+            $params = $payload['params'] ?? [];
             foreach ($params as $key => $value) {
                 ${"variable".$key} = $value;
             }

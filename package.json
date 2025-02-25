@@ -1,6 +1,6 @@
 {
   "name": "@markhuot/synapse",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "scripts": {
     "build": "tsc --skipLibCheck js/vite.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,11 +13,15 @@
   "license": "MIT",
   "description": "",
   "devDependencies": {
+    "@babel/parser": "^7.26.9",
     "@rollup/plugin-typescript": "^12.1.2",
     "@types/node": "^22.13.5",
+    "acorn": "^8.14.0",
     "acorn-walk": "^8.3.4",
     "astring": "^1.9.0",
+    "memfs": "^4.17.0",
     "typescript": "^5.7.3",
-    "vite": "^6.1.1"
+    "vite": "^6.1.1",
+    "vitest": "^3.0.7"
   }
 }
