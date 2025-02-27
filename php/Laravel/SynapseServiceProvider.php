@@ -15,6 +15,12 @@ class SynapseServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/config.php', 'synapse');
+
+        $this->app->bind(HandleSynapseRequest::class, function ($app) {
+            return new HandleSynapseRequest(
+                path: config('synapse.handlerFilesystemPath'),
+            );
+        });
     }
 
     /**
@@ -22,13 +28,11 @@ class SynapseServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Route::middleware(['web'])->group(function () {
+        Route::middleware(config('synapse.handlerMiddleware'))->group(function () {
             Route::post(config('synapse.handlerUri'), function(Request $request) {
                 $payloads = $request->get('_payloads') ?: [];
 
-                return app(HandleSynapseRequest::class, [
-                    'path' => config('synapse.handlerFilesystemPath'),
-                ])($payloads);
+                return app(HandleSynapseRequest::class)($payloads);
             });
         });
     }

@@ -2,7 +2,7 @@
   "name": "@markhuot/synapse",
   "version": "1.0.5",
   "scripts": {
-    "build": "tsc --skipLibCheck js/vite.ts",
+    "build": "tsc --skipLibCheck --esModuleInterop js/vite.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "exports": {
@@ -19,6 +19,7 @@
     "acorn": "^8.14.0",
     "acorn-walk": "^8.3.4",
     "astring": "^1.9.0",
+    "deepmerge": "^4.3.1",
     "memfs": "^4.17.0",
     "typescript": "^5.7.3",
     "vite": "^6.1.1",

@@ -79,7 +79,7 @@ export default defineConfig({
         synapse({
             include: [/\.tsx$/],
             exclude: [/node_modules/],
-            handlerPath: '.synapse/handlers/'
+            synapsePath: '.synapse'
         }),
     ],
 });
