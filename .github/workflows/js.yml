@@ -2,11 +2,22 @@ name: JavaScript
 
 on:
   push:
-    tags:
-      - '*'
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '23.x'
+      - name: Install modules
+        run: npm install
+      - name: Run tests
+        run: npm test
   publish:
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

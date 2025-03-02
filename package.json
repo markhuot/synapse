@@ -3,7 +3,7 @@
   "version": "1.0.5",
   "scripts": {
     "build": "tsc --skipLibCheck --esModuleInterop js/vite.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npx vitest js/vite.test.ts"
   },
   "exports": {
     "./php": "./js/php",
