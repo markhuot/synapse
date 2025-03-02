@@ -14,6 +14,11 @@
             "Synapse\\": "php/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "php/tests/"
+        }
+    },
     "extra": {
         "laravel": {
             "providers": [
@@ -26,10 +31,10 @@
             "pestphp/pest-plugin": true
         }
     },
-    "require": {
-        "laravel/framework": "^11.0|^12.0"
-    },
     "require-dev": {
         "pestphp/pest": "^3.7"
+    },
+    "require": {
+        "laravel/framework": "^11|^12"
     }
 }
