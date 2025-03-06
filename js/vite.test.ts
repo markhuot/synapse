@@ -2,10 +2,7 @@ import { vol, fs } from "memfs";
 
 vi.mock('fs', async () => {
     const memfs = await vi.importActual('memfs');
-    return {
-        default: memfs.fs,
-        ...memfs.fs,
-    };
+    return memfs;
 });
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -83,8 +80,8 @@ describe('synapse vite plugin', () => {
         expect(phpContent).toBe(`<?php\n\nreturn ['foo' => 'bar'];\n`);
 
         // Verify the manifest contains the setup mapping
-        const manifestContent = fs.readFileSync('/test/.synapse/manifest.json', 'utf8');
-        expect(JSON.parse(manifestContent)).toStrictEqual({setups: {'test2.ts': 'm6mllh'}});
+        const manifestContent = fs.readFileSync('/test/.synapse/manifest.json').toString('utf8');
+        expect(JSON.parse(manifestContent)).toStrictEqual({hierarchy: {}, setups: {'test2.ts': 'm6mllh'}});
     });
 
     it('writes a setup manifest for functions', () => {
@@ -108,8 +105,8 @@ describe('synapse vite plugin', () => {
         expect(phpContent).toBe(`<?php\n\nreturn ['foo' => 'bar'];\n`);
 
         // Verify the manifest contains the setup mapping
-        const manifestContent = fs.readFileSync('/test/.synapse/manifest.json', 'utf8');
-        expect(JSON.parse(manifestContent)).toStrictEqual({setups: {'test2.ts': 'm6mllh'}});
+        const manifestContent = fs.readFileSync('/test/.synapse/manifest.json').toString('utf8');
+        expect(JSON.parse(manifestContent)).toStrictEqual({hierarchy: {}, setups: {'test2.ts': 'm6mllh'}});
     });
 
     it('extends the manifest, and its not last one wins', () => {
@@ -122,11 +119,69 @@ describe('synapse vite plugin', () => {
         plugin.generateBundle.call(mockContext);
 
         // Verify the manifest contains the setup mapping
-        const manifestContent = fs.readFileSync('/test/.synapse/manifest.json', 'utf8');
-        expect(JSON.parse(manifestContent)).toStrictEqual({setups: {
+        const manifestContent = fs.readFileSync('/test/.synapse/manifest.json').toString('utf8');
+        expect(JSON.parse(manifestContent)).toStrictEqual({hierarchy: {}, setups: {
             'test2.ts': 'm6mllh',
             'test3.ts': 'ka0kvo',
             'test4.ts': 'pu1onn',
         }});
+    });
+
+    it('tracks import hierarchies in the manifest for files with php tags', () => {
+        // Create test files with different import scenarios
+        const entryFile = `
+            import { foo } from './intermediary';
+            import { bar } from './direct-php';
+            const result = php\`echo "entry";\`;
+        `;
+
+        const intermediaryFile = `
+            import { baz } from './nested-php';
+            export const foo = 123;
+        `;
+
+        const directPhpFile = `
+            export const bar = php\`echo "direct";\`;
+        `;
+
+        const nestedPhpFile = `
+            export const baz = php\`echo "nested";\`;
+        `;
+
+        const irrelevantFile = `
+            export const nothing = 'here';
+        `;
+
+        // Write the files to disk first
+        fs.mkdirSync('/test', { recursive: true });
+        fs.writeFileSync('/test/entry.ts', entryFile);
+        fs.writeFileSync('/test/intermediary.ts', intermediaryFile);
+        fs.writeFileSync('/test/direct-php.ts', directPhpFile);
+        fs.writeFileSync('/test/nested-php.ts', nestedPhpFile);
+        fs.writeFileSync('/test/irrelevant.ts', irrelevantFile);
+
+        // Transform all the files
+        plugin.buildStart(); // Reset the manifest
+        plugin.transform.call(mockContext, entryFile, '/test/entry.ts');
+        plugin.transform.call(mockContext, intermediaryFile, '/test/intermediary.ts');
+        plugin.transform.call(mockContext, directPhpFile, '/test/direct-php.ts');
+        plugin.transform.call(mockContext, nestedPhpFile, '/test/nested-php.ts');
+        plugin.transform.call(mockContext, irrelevantFile, '/test/irrelevant.ts');
+        plugin.generateBundle.call(mockContext);
+
+        // Read and verify the manifest
+        const manifestContent = JSON.parse(fs.readFileSync('/test/.synapse/manifest.json').toString('utf8'));
+
+        expect(manifestContent.hierarchy).toStrictEqual({
+            'entry.ts': {
+                'intermediary.ts': {
+                    'nested-php.ts': {}
+                },
+                'direct-php.ts': {}
+            }
+        });
+
+        // Verify irrelevant file is not included
+        expect(manifestContent.hierarchy['irrelevant.ts']).toBeUndefined();
     });
 });

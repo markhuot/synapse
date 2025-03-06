@@ -12,7 +12,7 @@ export function synapse(options:{
 } ={}) {
     const synapsePath = options.synapsePath || '.synapse/';
     const filter = createFilter(
-        options.include || [],
+        options.include || [/\.[jt]sx?$/],
         options.exclude || [/node_modules/, new RegExp(synapsePath)],
     );
 
@@ -20,11 +20,20 @@ export function synapse(options:{
     let manifest;
     let manifestPath;
     let isDev = false;
+    // Track imports and php tag usage
+    const fileImports = new Map();
+    const filesWithPhpTags = new Set();
 
     return {
         name: 'transform-php',
         buildStart() {
-            manifest = { setups: {} };
+            manifest = {
+                setups: {},
+                hierarchy: {} // Add hierarchy to manifest
+            };
+            // Reset tracking on build start
+            fileImports.clear();
+            filesWithPhpTags.clear();
         },
         configResolved(config) {
             viteRoot = config.root;
@@ -34,17 +43,52 @@ export function synapse(options:{
         transform(code, id) {
             if (!filter(id)) return;
 
-            // early bail to speed up compiles
-            if (! code.includes('php`')) {
+            const projectPath = path.relative(viteRoot, id);
+
+            // Track imports first
+            const ast = this.parse(code);
+            simple(ast, {
+                ImportDeclaration(node: any) {
+                    const importPath = node.source?.value;
+                    if (typeof importPath !== 'string') return;
+
+                    // Handle relative imports
+                    let absoluteImportPath = importPath.startsWith('.')
+                        ? path.resolve(path.dirname(id), importPath)
+                        : importPath;
+
+                    // Add extension if not present
+                    if (!path.extname(absoluteImportPath)) {
+                        // Try common extensions
+                        const extensions = ['.ts', '.tsx', '.js', '.jsx'];
+                        for (const ext of extensions) {
+                            const pathWithExt = absoluteImportPath + ext;
+                            if (fs.existsSync(pathWithExt)) {
+                                absoluteImportPath = pathWithExt;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!fileImports.has(id)) {
+                        fileImports.set(id, new Set());
+                    }
+                    fileImports.get(id).add(absoluteImportPath);
+                }
+            });
+
+            // early bail to speed up compiles, but after tracking imports
+            if (!code.includes('php`')) {
                 return {
                     code,
                     map: null,
                 }
             }
 
-            const projectPath = path.relative(viteRoot, id);
+            // Mark this file as containing php tags
+            filesWithPhpTags.add(id);
+
             let tagIndex = 0;
-            const ast = this.parse(code);
 
             ancestor(ast, {
                 ImportDeclaration(node) {
@@ -109,6 +153,46 @@ export function synapse(options:{
             };
         },
         generateBundle() {
+            // Build the hierarchy before writing the manifest
+            const buildHierarchy = (filePath) => {
+                const result = {};
+                const imports = fileImports.get(filePath) || new Set();
+
+                for (const importPath of imports) {
+                    // Only include this import if it contains php tags or has children that do
+                    if (filesWithPhpTags.has(importPath)) {
+                        const relativePath = path.relative(viteRoot, importPath);
+                        result[relativePath] = buildHierarchy(importPath);
+                    } else if (fileImports.has(importPath)) {
+                        const childHierarchy = buildHierarchy(importPath);
+                        // Only include if child hierarchy is not empty
+                        if (Object.keys(childHierarchy).length > 0) {
+                            const relativePath = path.relative(viteRoot, importPath);
+                            result[relativePath] = childHierarchy;
+                        }
+                    }
+                }
+
+                return result;
+            };
+
+            // Build hierarchy for all entry points (files that aren't imported by others)
+            const allFiles = new Set([...fileImports.keys()]);
+            const importedFiles = new Set();
+            fileImports.forEach(imports => {
+                imports.forEach(imp => importedFiles.add(imp));
+            });
+
+            const entryPoints = [...allFiles].filter(file => !importedFiles.has(file));
+
+            entryPoints.forEach(entryPoint => {
+                const hierarchy = buildHierarchy(entryPoint);
+                if (Object.keys(hierarchy).length > 0 || filesWithPhpTags.has(entryPoint)) {
+                    const relativePath = path.relative(viteRoot, entryPoint);
+                    manifest.hierarchy[relativePath] = hierarchy;
+                }
+            });
+
             writeManifest(manifest, manifestPath);
         }
     }

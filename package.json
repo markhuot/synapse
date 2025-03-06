@@ -2,7 +2,7 @@
   "name": "@markhuot/synapse",
   "version": "1.0.5",
   "scripts": {
-    "build": "tsc --skipLibCheck --esModuleInterop js/vite.ts",
+    "build": "tsc --skipLibCheck --esModuleInterop --target esnext --module NodeNext --moduleResolution nodenext js/vite.ts",
     "test": "npx vitest js/vite.test.ts"
   },
   "exports": {
