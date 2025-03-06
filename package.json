@@ -1,6 +1,6 @@
 {
   "name": "@markhuot/synapse",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "scripts": {
     "build": "tsc --skipLibCheck --esModuleInterop --target esnext --module NodeNext --moduleResolution nodenext js/vite.ts",
     "test": "npx vitest js/vite.test.ts"
